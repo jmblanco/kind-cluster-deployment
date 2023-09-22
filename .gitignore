@@ -1,0 +1,15 @@
+### Mac ###
+.DS_Store
+*/.DS_Store
+*/.DS_Store
+
+### VisualStudioCode ###
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history
+
+### intellij ###
+.idea/*
