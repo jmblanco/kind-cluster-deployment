@@ -3,7 +3,12 @@ kind: Ingress
 metadata:
   name: kafka-ui-ingress
   namespace: kafka
+  annotations:
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "X-Frame-Options: SAMEORIGIN";
+      more_set_headers "X-Content-Type-Options: nosniff";
 spec:
+  ingressClassName: nginx
   rules:
   - host: kafka-ui.local
     http:
