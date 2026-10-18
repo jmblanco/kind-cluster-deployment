@@ -1,6 +1,6 @@
 {
   "name": "kind-cluster-deployment",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Fast automated local Kubernetes cluster deployment with Kind, Traefik, APISIX, Strimzi Kafka, Zot Registry, ArgoCD, and Headlamp",
   "scripts": {
     "start": "npm start --prefix cli",

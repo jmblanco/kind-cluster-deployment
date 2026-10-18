@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-10-18
+
+### Added
+- **Demo Reference Microservice (`order-service`):**
+  - Event-driven microservice implemented in Node.js/Express under `examples/order-service/`.
+  - Kafka integration with KafkaJS producing `OrderCreatedEvent` to `orders.incoming` topic and consuming events asynchronously.
+  - MongoDB persistence storing orders into `orders_db` with in-memory fallback.
+  - Multi-stage non-root `Dockerfile` optimized for local container runtime.
+  - Kubernetes manifests (`templates/order-service.deployment.yaml`) and Traefik Ingress routing (`ingress/order-service.ingress.yaml`) at `http://orders.local`.
+  - CLI deployment module (`cli/src/modules/demo-service.js`), interactive TUI menu option (`📦 Deploy Demo Order Service`), and direct command `npm start demo`.
+- **Spec-Driven Development (SDD) Framework & Governance:**
+  - Comprehensive methodology guide in `docs/SDD-GUIDE.md` defining ADR $\rightarrow$ SPEC $\rightarrow$ PLAN workflow and storage conventions.
+  - Visual Backlog Status Dashboard in `docs/PANEL-STATUS.md` tracking all 10 platform initiatives (80% implemented).
+  - Synchronized master navigation index in `docs/README.md`.
+
 ## [1.3.0] - 2026-10-18
 
 ### Added
