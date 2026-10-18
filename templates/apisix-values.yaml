@@ -1,0 +1,42 @@
+# Helm values for Apache APISIX on Kind (Lightweight local deployment)
+apisix:
+  replicaCount: 1
+
+gateway:
+  type: NodePort
+  http:
+    enabled: true
+    servicePort: 9080
+    containerPort: 9080
+  tls:
+    enabled: true
+    servicePort: 9443
+    containerPort: 9443
+
+admin:
+  enabled: true
+  type: ClusterIP
+  credentials:
+    admin: "adminLocalToken123!"
+
+# Internal etcd instance configured with minimal resources for Kind
+etcd:
+  enabled: true
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 128Mi
+
+# Ingress Controller integration
+ingress-controller:
+  enabled: true
+  config:
+    apisix:
+      adminKey: "adminLocalToken123!"
+
+dashboard:
+  enabled: false

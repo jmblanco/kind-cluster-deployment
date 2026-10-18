@@ -1,0 +1,110 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cluster-dashboard
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cluster-dashboard-role
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "services", "namespaces", "events", "pods/log"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["metrics.k8s.io"]
+    resources: ["nodes", "pods"]
+    verbs: ["get", "list"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "statefulsets", "daemonsets"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cluster-dashboard-binding
+subjects:
+  - kind: ServiceAccount
+    name: cluster-dashboard
+    namespace: default
+roleRef:
+  kind: ClusterRole
+  name: cluster-dashboard-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cluster-dashboard
+  namespace: default
+  labels:
+    app: cluster-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cluster-dashboard
+  template:
+    metadata:
+      labels:
+        app: cluster-dashboard
+    spec:
+      serviceAccountName: cluster-dashboard
+      containers:
+      - name: dashboard
+        image: localhost:5000/cluster-dashboard:v2.0.0
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true
+          runAsUser: 1000
+        ports:
+        - containerPort: 8088
+          name: http
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+          requests:
+            cpu: 20m
+            memory: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cluster-dashboard
+  namespace: default
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8088
+    targetPort: 8088
+    name: http
+  selector:
+    app: cluster-dashboard
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cluster-dashboard-ingress
+  namespace: default
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+    traefik.ingress.kubernetes.io/router.middlewares: traefik-security-headers@kubernetescrd
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: dashboard.local
+    http:
+      paths:
+      - pathType: Prefix
+        path: /
+        backend:
+          service:
+            name: cluster-dashboard
+            port:
+              number: 8088

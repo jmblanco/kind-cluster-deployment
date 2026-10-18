@@ -1,4 +1,4 @@
-name: CI - Lint & Validate
+name: CI - Lint & Test
 
 on:
   push:
@@ -7,17 +7,39 @@ on:
     branches: [ main ]
 
 jobs:
-  lint:
-    name: Lint & Validation
+  test:
+    name: Node.js Test & Audit
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Run ShellCheck on Bash Scripts
-        uses: ludeeus/action-shellcheck@2.0.0
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          scandir: '.'
+          node-version: '20'
+
+      - name: Install CLI Dependencies
+        run: |
+          cd cli
+          npm ci
+
+      - name: Run Test Suite
+        run: |
+          cd cli
+          npm test
+
+      - name: Run Security Audit
+        run: |
+          cd cli
+          npm audit
+
+  lint:
+    name: YAML Lint & Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
       - name: Set up Python for YAML Lint
         uses: actions/setup-python@v5

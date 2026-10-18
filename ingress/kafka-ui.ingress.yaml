@@ -4,11 +4,10 @@ metadata:
   name: kafka-ui-ingress
   namespace: kafka
   annotations:
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      more_set_headers "X-Frame-Options: SAMEORIGIN";
-      more_set_headers "X-Content-Type-Options: nosniff";
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+    traefik.ingress.kubernetes.io/router.middlewares: traefik-security-headers@kubernetescrd
 spec:
-  ingressClassName: nginx
+  ingressClassName: traefik
   rules:
   - host: kafka-ui.local
     http:
@@ -20,6 +19,3 @@ spec:
             name: kafka-ui
             port:
               number: 80
-
-
-

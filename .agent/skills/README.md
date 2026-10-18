@@ -8,16 +8,17 @@ This directory contains specialized Antigravity Agent skills located in `.agent/
 
 | Skill Name | Location | Primary Role & Capabilities | Trigger Scenarios |
 | :--- | :--- | :--- | :--- |
-| **`cluster-doctor`** | [`.agent/skills/cluster-doctor/SKILL.md`](./cluster-doctor/SKILL.md) | Local health audits, port collision detection (80, 443, 5000, 37017), Docker Desktop resource pressure, crash analysis, and automated remediation. | Broken cluster, pods in `CrashLoopBackOff`, `OOMKilled`, `Pending`, failed start of `init.sh`/`init.ps1`, unreachable local domains. |
+| **`cluster-doctor`** | [`.agent/skills/cluster-doctor/SKILL.md`](./cluster-doctor/SKILL.md) | Local health audits, port collision detection (80, 443, 5000, 37017), Docker Desktop resource pressure, crash analysis, and automated remediation. | Broken cluster, pods in `CrashLoopBackOff`, `OOMKilled`, `Pending`, failed start of deployment, unreachable local domains. |
 | **`microservice-scaffold`** | [`.agent/skills/microservice-scaffold/SKILL.md`](./microservice-scaffold/SKILL.md) | Standardized generation and deployment of microservices connected to Strimzi Kafka, MongoDB, Ingress, and the Kind local registry (`localhost:5000`). | Creating or deploying new apps, mocks, producers, consumers, or REST APIs on the Kind cluster. |
 | **`kafka-traffic-tester`** | [`.agent/skills/kafka-traffic-tester/SKILL.md`](./kafka-traffic-tester/SKILL.md) | Ephemeral Kafka KRaft pub/sub testing: automated creation of `KafkaTopic` CRDs, console producer injection, consumer polling, and Kafka UI validation. | Validating Kafka broker health, simulating event streams, or testing real-time event arrival in Kafka UI. |
+| **`doc-sync`** | [`.agent/skills/doc-sync/SKILL.md`](./doc-sync/SKILL.md) | Automated audit and continuous synchronization of technical guides, README, AGENTS.md, ADRs, and plans against codebase changes. | Modifications in CLI modules, new services, completed SDD plans, or requests to reorganize documentation. |
 
 ---
 
 ## Detailed Skill Instructions
 
 ### 1. `cluster-doctor`
-- **When to activate:** Whenever `init.sh` or `init.ps1` fails during creation, or when pods fail to report `Ready` status.
+- **When to activate:** Whenever deployment fails during creation, or when pods fail to report `Ready` status.
 - **Workflow:**
   1. Inspect host port bindings for `80`, `443`, `5000`, `37017`.
   2. Query Docker daemon state and orphan Kind containers.

@@ -1,0 +1,23 @@
+{
+  "name": "kind-cluster-deployment",
+  "version": "1.3.0",
+  "description": "Fast automated local Kubernetes cluster deployment with Kind, Traefik, APISIX, Strimzi Kafka, Zot Registry, ArgoCD, and Headlamp",
+  "scripts": {
+    "start": "npm start --prefix cli",
+    "cli": "npm start --prefix cli",
+    "test": "npm test --prefix cli",
+    "audit": "npm audit --prefix cli"
+  },
+  "keywords": [
+    "kind",
+    "kubernetes",
+    "kafka",
+    "strimzi",
+    "traefik",
+    "apisix",
+    "argocd",
+    "headlamp"
+  ],
+  "author": "Antigravity Agent",
+  "license": "Apache-2.0"
+}

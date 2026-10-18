@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kind Operational Service Hub & Developer Portal</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: rgba(18, 24, 38, 0.75);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.15);
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --code-bg: #0f172a;
+      --tab-inactive: rgba(255, 255, 255, 0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1.5rem;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.12) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.08) 0px, transparent 50%);
+    }
+
+    .container {
+      max-width: 1240px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 1.5rem;
+    }
+
+    .header-title h1 {
+      font-size: 1.85rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      letter-spacing: -0.025em;
+    }
+
+    .badge-hub {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      color: white;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .header-meta {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    .refresh-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      border: 1px solid var(--card-border);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--success);
+      display: inline-block;
+    }
+
+    .pulse {
+      animation: pulse-animation 2s infinite;
+    }
+
+    @keyframes pulse-animation {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+      70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    /* Tabs Bar */
+    .tabs-bar {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 0.75rem;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: var(--tab-inactive);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      padding: 0.65rem 1.25rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: #000;
+      font-weight: 600;
+      border-color: var(--accent);
+    }
+
+    /* Tab Content Areas */
+    .tab-pane {
+      display: none;
+    }
+
+    .tab-pane.active {
+      display: block;
+    }
+
+    /* Metrics Grid */
+    .metrics-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .metric-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      padding: 1.25rem;
+      border-radius: 12px;
+      position: relative;
+    }
+
+    .metric-title {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    .metric-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+    }
+
+    .metric-sub {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    .progress-bar-bg {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      height: 6px;
+      margin-top: 0.75rem;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      background: var(--accent);
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.4s ease;
+    }
+
+    /* Services Grid */
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .service-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .service-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(56, 189, 248, 0.4);
+    }
+
+    .service-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+    }
+
+    .service-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .service-category {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .status-pill {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.55rem;
+      border-radius: 20px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .status-pill.healthy {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-pill.unhealthy {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .latency-pill {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.05);
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      margin-left: 0.4rem;
+    }
+
+    .service-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      margin-bottom: 1rem;
+    }
+
+    .service-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--card-border);
+      font-size: 0.8rem;
+    }
+
+    .service-url {
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-weight: 500;
+    }
+
+    .service-url:hover {
+      text-decoration: underline;
+    }
+
+    /* Developer Hub Cheat Sheet */
+    .snippets-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .snippet-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 1.25rem;
+    }
+
+    .snippet-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .snippet-field {
+      margin-bottom: 0.85rem;
+    }
+
+    .snippet-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 0.35rem;
+      display: block;
+    }
+
+    .copy-box {
+      background: var(--code-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 0.5rem 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: #38bdf8;
+      overflow-x: auto;
+    }
+
+    .copy-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      margin-left: 0.5rem;
+      padding: 0.2rem;
+      display: flex;
+      align-items: center;
+      transition: color 0.2s;
+    }
+
+    .copy-btn:hover {
+      color: #fff;
+    }
+
+    /* Tables & Search */
+    .table-controls {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .search-input, .select-input {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+    }
+
+    .search-input {
+      min-width: 250px;
+    }
+
+    .table-wrapper {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.85rem;
+    }
+
+    th, td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    th {
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+
+    tr:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .phase-badge {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .phase-badge.Running {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+    }
+
+    .phase-badge.Pending {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+    }
+
+    .phase-badge.Failed, .phase-badge.CrashLoopBackOff {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+    }
+
+    .action-btn-sm {
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: var(--accent);
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.75rem;
+    }
+
+    .action-btn-sm:hover {
+      background: var(--accent);
+      color: #000;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      z-index: 999;
+      justify-content: center;
+      align-items: center;
+      padding: 1.5rem;
+    }
+
+    .modal-box {
+      background: #0f172a;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 900px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .modal-title {
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: monospace;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.25rem;
+    }
+
+    .modal-body {
+      padding: 1rem 1.25rem;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: #e2e8f0;
+      white-space: pre-wrap;
+      line-height: 1.4;
+      background: #020617;
+      flex-grow: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-title">
+        <h1>
+          <span>Kind Service Hub</span>
+          <span class="badge-hub">IDP Ops v2.0</span>
+        </h1>
+      </div>
+      <div class="header-meta">
+        <div>Clúster: <strong id="cluster-name">kind-k8s-local</strong></div>
+        <div class="refresh-indicator">
+          <span class="status-dot pulse"></span>
+          <span>Live Sync 5s</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs-bar">
+      <button class="tab-btn active" onclick="switchTab('services')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Servicios & Plataforma
+      </button>
+      <button class="tab-btn" onclick="switchTab('metrics')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        Métricas & Telemetría
+      </button>
+      <button class="tab-btn" onclick="switchTab('developer')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Developer Hub (Cheat Sheet)
+      </button>
+      <button class="tab-btn" onclick="switchTab('pods')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Explorador de Pods & Logs
+      </button>
+      <button class="tab-btn" onclick="switchTab('events')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Eventos del Clúster
+      </button>
+    </div>
+
+    <!-- TAB 1: Servicios & Plataforma -->
+    <div id="tab-services" class="tab-pane active">
+      <div class="metrics-summary-grid">
+        <div class="metric-card">
+          <div class="metric-title">Pods Activos</div>
+          <div class="metric-value"><span id="pods-running">0</span> <span class="metric-sub" id="pods-total">/ 0</span></div>
+          <div class="metric-sub" id="pods-status-sub">Sondeando API...</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">Servicios Núcleo</div>
+          <div class="metric-value" id="services-online">0 / 8</div>
+          <div class="metric-sub">Traefik, APISIX, Kafka, Argo...</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">DNS Ingress Dominio</div>
+          <div class="metric-value" style="color: var(--accent); font-size: 1.3rem;">*.local</div>
+          <div class="metric-sub">Traefik HostPort 80/443</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">GitOps Engine</div>
+          <div class="metric-value" style="color: #38bdf8; font-size: 1.3rem;">ArgoCD</div>
+          <div class="metric-sub">https://argocd.local</div>
+        </div>
+      </div>
+
+      <div class="services-grid" id="services-grid">
+        <!-- Renderizado dinámicamente -->
+      </div>
+    </div>
+
+    <!-- TAB 2: Métricas & Telemetría -->
+    <div id="tab-metrics" class="tab-pane">
+      <div class="metrics-summary-grid">
+        <div class="metric-card">
+          <div class="metric-title">CPU Nodo Kind</div>
+          <div class="metric-value" id="node-cpu-val">0m</div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" id="node-cpu-bar" style="width: 0%;"></div></div>
+          <div class="metric-sub" id="node-cpu-sub">Fuente: Metrics-Server</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">Memoria Nodo Kind</div>
+          <div class="metric-value" id="node-mem-val">0 MiB</div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" id="node-mem-bar" style="width: 0%; background: #34d399;"></div></div>
+          <div class="metric-sub" id="node-mem-sub">Asignación local</div>
+        </div>
+      </div>
+
+      <h3 style="margin-bottom: 1rem; font-size: 1.1rem;">Top Pods por Consumo de Recursos</h3>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Namespace</th>
+              <th>Pod</th>
+              <th>Consumo CPU (mcores)</th>
+              <th>Consumo RAM (MiB)</th>
+            </tr>
+          </thead>
+          <tbody id="metrics-table-body">
+            <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Consultando telemetría...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 3: Developer Hub -->
+    <div id="tab-developer" class="tab-pane">
+      <div class="snippets-grid" id="snippets-grid">
+        <!-- Renderizado dinámicamente -->
+      </div>
+    </div>
+
+    <!-- TAB 4: Explorador de Pods & Logs -->
+    <div id="tab-pods" class="tab-pane">
+      <div class="table-controls">
+        <input type="text" id="pod-search" class="search-input" placeholder="Buscar pod por nombre..." oninput="filterPods()">
+        <select id="namespace-filter" class="select-input" onchange="filterPods()">
+          <option value="ALL">Todos los Namespaces</option>
+        </select>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Namespace</th>
+              <th>Pod Name</th>
+              <th>Ready</th>
+              <th>Restarts</th>
+              <th>Fase</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="pods-table-body">
+            <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Cargando pods...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 5: Eventos del Clúster -->
+    <div id="tab-events" class="tab-pane">
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Tipo</th>
+              <th>Namespace</th>
+              <th>Motivo / Objeto</th>
+              <th>Mensaje</th>
+              <th>Contador</th>
+            </tr>
+          </thead>
+          <tbody id="events-table-body">
+            <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Cargando eventos...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Logs -->
+  <div class="modal-backdrop" id="logs-modal" onclick="closeLogsModal(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title" id="logs-modal-title">Logs: default/pod</div>
+        <button class="modal-close" onclick="closeLogsModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="logs-modal-content">Cargando logs...</div>
+    </div>
+  </div>
+
+  <script>
+    let globalData = { pods: [], services: [] };
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+      
+      const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+      if (activeBtn) activeBtn.classList.add('active');
+      
+      const targetPane = document.getElementById(`tab-${tabId}`);
+      if (targetPane) targetPane.classList.add('active');
+
+      if (tabId === 'metrics') fetchMetrics();
+      if (tabId === 'events') fetchEvents();
+      if (tabId === 'developer') fetchSnippets();
+    }
+
+    async function fetchStatus() {
+      try {
+        const res = await fetch('/api/status');
+        const data = await res.json();
+        globalData = data;
+        renderOverview(data);
+        updateNamespaceFilter(data.pods);
+        filterPods();
+      } catch (err) {
+        console.error("Error al consultar /api/status:", err);
+      }
+    }
+
+    async function fetchMetrics() {
+      try {
+        const res = await fetch('/api/metrics');
+        const metrics = await res.json();
+        renderMetrics(metrics);
+      } catch (err) {
+        console.error("Error al consultar /api/metrics:", err);
+      }
+    }
+
+    async function fetchEvents() {
+      try {
+        const res = await fetch('/api/events');
+        const events = await res.json();
+        renderEvents(events);
+      } catch (err) {
+        console.error("Error al consultar /api/events:", err);
+      }
+    }
+
+    async function fetchSnippets() {
+      try {
+        const res = await fetch('/api/snippets');
+        const snippets = await res.json();
+        renderSnippets(snippets);
+      } catch (err) {
+        console.error("Error al consultar /api/snippets:", err);
+      }
+    }
+
+    function renderOverview(data) {
+      document.getElementById('cluster-name').textContent = data.cluster || 'kind-k8s-local';
+      
+      const pods = data.pods || [];
+      const runningCount = pods.filter(p => p.phase === 'Running').length;
+      document.getElementById('pods-running').textContent = runningCount;
+      document.getElementById('pods-total').textContent = `/ ${pods.length}`;
+      document.getElementById('pods-status-sub').textContent = `${runningCount} en ejecución activa`;
+
+      const services = data.services || [];
+      const healthySvcs = services.filter(s => s.healthy).length;
+      document.getElementById('services-online').textContent = `${healthySvcs} / ${services.length}`;
+
+      const grid = document.getElementById('services-grid');
+      grid.innerHTML = services.map(s => `
+        <div class="service-card">
+          <div>
+            <div class="service-header">
+              <div>
+                <div class="service-name">${s.name}</div>
+                <div class="service-category">${s.category}</div>
+              </div>
+              <div class="status-pill ${s.healthy ? 'healthy' : 'unhealthy'}">
+                <span class="status-dot ${s.healthy ? 'pulse' : ''}"></span>
+                ${s.healthy ? 'ONLINE' : 'OFFLINE'}
+                ${s.latencyMs !== null && s.latencyMs !== undefined ? `<span class="latency-pill">${s.latencyMs} ms</span>` : ''}
+              </div>
+            </div>
+            <p class="service-desc">${s.description}</p>
+          </div>
+          <div class="service-meta">
+            <span>Puerto: <code>${s.internalPort}</code></span>
+            <a href="${s.url}" target="_blank" class="service-url">
+              Abrir
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+            </a>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderMetrics(m) {
+      if (m.node) {
+        document.getElementById('node-cpu-val').textContent = m.node.cpuUsed;
+        document.getElementById('node-cpu-bar').style.width = `${m.node.cpuPercent}%`;
+        document.getElementById('node-cpu-sub').textContent = `${m.node.cpuPercent}% capacidad relativa`;
+
+        document.getElementById('node-mem-val').textContent = m.node.memUsed;
+        document.getElementById('node-mem-bar').style.width = `${m.node.memPercent}%`;
+        document.getElementById('node-mem-sub').textContent = `${m.node.memPercent}% de cuota asignada`;
+      }
+
+      const tbody = document.getElementById('metrics-table-body');
+      const top = m.topPods || [];
+      if (top.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Métricas aún inicializando...</td></tr>';
+      } else {
+        tbody.innerHTML = top.map(p => `
+          <tr>
+            <td><code>${p.namespace}</code></td>
+            <td><strong>${p.name}</strong></td>
+            <td>${p.cpu_m} m</td>
+            <td>${p.mem_mi} MiB</td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    function renderEvents(events) {
+      const tbody = document.getElementById('events-table-body');
+      if (events.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No hay eventos recientes en el clúster.</td></tr>';
+      } else {
+        tbody.innerHTML = events.map(e => `
+          <tr>
+            <td><span class="phase-badge ${e.type === 'Warning' ? 'Failed' : 'Running'}">${e.type}</span></td>
+            <td><code>${e.namespace}</code></td>
+            <td><strong>${e.reason}</strong> (${e.object})</td>
+            <td style="max-width: 450px;">${e.message}</td>
+            <td>${e.count}</td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    function renderSnippets(s) {
+      const grid = document.getElementById('snippets-grid');
+      let html = '';
+
+      if (s.mongodb) {
+        html += `
+          <div class="snippet-card">
+            <div class="snippet-title">🍃 ${s.mongodb.title}</div>
+            <div class="snippet-field">
+              <span class="snippet-label">Conexión Externa (Host / Compass)</span>
+              <div class="copy-box"><span>${s.mongodb.connectionHost}</span><button class="copy-btn" onclick="copyText('${s.mongodb.connectionHost}')">📋</button></div>
+            </div>
+            <div class="snippet-field">
+              <span class="snippet-label">Conexión Interna (Pods Kind)</span>
+              <div class="copy-box"><span>${s.mongodb.connectionInternal}</span><button class="copy-btn" onclick="copyText('${s.mongodb.connectionInternal}')">📋</button></div>
+            </div>
+            <div class="snippet-field">
+              <span class="snippet-label">Variable de Entorno (.env)</span>
+              <div class="copy-box"><span>${s.mongodb.envVar}</span><button class="copy-btn" onclick="copyText('${s.mongodb.envVar}')">📋</button></div>
+            </div>
+          </div>
+        `;
+      }
+
+      if (s.kafka) {
+        html += `
+          <div class="snippet-card">
+            <div class="snippet-title">⚡ ${s.kafka.title}</div>
+            <div class="snippet-field">
+              <span class="snippet-label">Bootstrap Broker Interno (ClusterIP)</span>
+              <div class="copy-box"><span>${s.kafka.bootstrapInternal}</span><button class="copy-btn" onclick="copyText('${s.kafka.bootstrapInternal}')">📋</button></div>
+            </div>
+            <div class="snippet-field">
+              <span class="snippet-label">Variable Microservicio</span>
+              <div class="copy-box"><span>${s.kafka.envVar}</span><button class="copy-btn" onclick="copyText('${s.kafka.envVar}')">📋</button></div>
+            </div>
+            <div class="snippet-field">
+              <span class="snippet-label">Tópico de Eventos Recomendado</span>
+              <div class="copy-box"><span>${s.kafka.testTopic}</span><button class="copy-btn" onclick="copyText('${s.kafka.testTopic}')">📋</button></div>
+            </div>
+          </div>
+        `;
+      }
+
+      if (s.registry) {
+        html += `
+          <div class="snippet-card">
+            <div class="snippet-title">📦 ${s.registry.title}</div>
+            <div class="snippet-field">
+              <span class="snippet-label">1. Taggear imagen local</span>
+              <div class="copy-box"><span>${s.registry.tagSnippet}</span><button class="copy-btn" onclick="copyText('${s.registry.tagSnippet}')">📋</button></div>
+            </div>
+            <div class="snippet-field">
+              <span class="snippet-label">2. Pushear a Zot Registry</span>
+              <div class="copy-box"><span>${s.registry.pushSnippet}</span><button class="copy-btn" onclick="copyText('${s.registry.pushSnippet}')">📋</button></div>
+            </div>
+          </div>
+        `;
+      }
+
+      if (s.argocd) {
+        html += `
+          <div class="snippet-card">
+            <div class="snippet-title">🐙 ${s.argocd.title}</div>
+            <div class="snippet-field">
+              <span class="snippet-label">Usuario Predeterminado</span>
+              <div class="copy-box"><span>${s.argocd.username}</span><button class="copy-btn" onclick="copyText('${s.argocd.username}')">📋</button></div>
+            </div>
+            <div class="snippet-field">
+              <span class="snippet-label">Extracción de Clave Admin</span>
+              <div class="copy-box"><span>${s.argocd.pwdExtractionCmd}</span><button class="copy-btn" onclick="copyText('${s.argocd.pwdExtractionCmd}')">📋</button></div>
+            </div>
+          </div>
+        `;
+      }
+
+      if (s.hosts) {
+        html += `
+          <div class="snippet-card">
+            <div class="snippet-title">🌐 ${s.hosts.title}</div>
+            <div class="snippet-field">
+              <span class="snippet-label">Línea obligatoria en /etc/hosts</span>
+              <div class="copy-box"><span>${s.hosts.entry}</span><button class="copy-btn" onclick="copyText('${s.hosts.entry}')">📋</button></div>
+            </div>
+          </div>
+        `;
+      }
+
+      grid.innerHTML = html;
+    }
+
+    function updateNamespaceFilter(pods) {
+      const select = document.getElementById('namespace-filter');
+      const current = select.value;
+      const namespaces = Array.from(new Set(pods.map(p => p.namespace))).sort();
+      
+      let opts = '<option value="ALL">Todos los Namespaces</option>';
+      namespaces.forEach(ns => {
+        opts += `<option value="${ns}" ${ns === current ? 'selected' : ''}>${ns}</option>`;
+      });
+      select.innerHTML = opts;
+    }
+
+    function filterPods() {
+      const query = (document.getElementById('pod-search').value || '').toLowerCase();
+      const nsFilter = document.getElementById('namespace-filter').value;
+      const tbody = document.getElementById('pods-table-body');
+      
+      const filtered = (globalData.pods || []).filter(p => {
+        const matchesQuery = p.name.toLowerCase().includes(query) || p.namespace.toLowerCase().includes(query);
+        const matchesNs = nsFilter === 'ALL' || p.namespace === nsFilter;
+        return matchesQuery && matchesNs;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No se encontraron pods coincidentes.</td></tr>';
+      } else {
+        tbody.innerHTML = filtered.map(p => `
+          <tr>
+            <td><code>${p.namespace}</code></td>
+            <td><strong>${p.name}</strong></td>
+            <td>${p.ready}</td>
+            <td>${p.restarts || 0}</td>
+            <td><span class="phase-badge ${p.phase}">${p.phase}</span></td>
+            <td>
+              <button class="action-btn-sm" onclick="showLogs('${p.namespace}', '${p.name}')">Ver Logs</button>
+            </td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    async function showLogs(namespace, pod) {
+      const modal = document.getElementById('logs-modal');
+      const title = document.getElementById('logs-modal-title');
+      const content = document.getElementById('logs-modal-content');
+
+      title.textContent = `Logs: ${namespace}/${pod}`;
+      content.textContent = 'Consultando logs...';
+      modal.style.display = 'flex';
+
+      try {
+        const res = await fetch(`/api/logs?namespace=${namespace}&pod=${pod}`);
+        const data = await res.json();
+        content.textContent = data.logs || 'Sin logs disponibles.';
+      } catch (err) {
+        content.textContent = `Error al consultar logs: ${err.message}`;
+      }
+    }
+
+    function closeLogsModal(e) {
+      document.getElementById('logs-modal').style.display = 'none';
+    }
+
+    function copyText(txt) {
+      navigator.clipboard.writeText(txt).then(() => {
+        alert('Copiado al portapapeles: ' + txt);
+      });
+    }
+
+    // Inicialización y polling
+    fetchStatus();
+    setInterval(fetchStatus, 5000);
+  </script>
+</body>
+</html>

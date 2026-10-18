@@ -1,0 +1,29 @@
+{
+  "name": "kind-cluster-cli",
+  "version": "1.0.0",
+  "description": "Interactive TUI Orchestrator for Local Kind Kubernetes Clusters",
+  "main": "src/index.js",
+  "type": "module",
+  "bin": {
+    "kind-manager": "./bin/kind-manager.js"
+  },
+  "scripts": {
+    "start": "node ./bin/kind-manager.js",
+    "test": "node --test tests/**/*.test.js"
+  },
+  "keywords": [
+    "kubernetes",
+    "kind",
+    "cli",
+    "tui",
+    "kafka",
+    "traefik",
+    "apisix"
+  ],
+  "author": "Antigravity Agent",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@clack/prompts": "^0.9.1",
+    "picocolors": "^1.1.1"
+  }
+}

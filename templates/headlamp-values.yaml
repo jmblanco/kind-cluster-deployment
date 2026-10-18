@@ -1,0 +1,24 @@
+# Helm values for Headlamp on Kind cluster
+replicaCount: 1
+
+config:
+  inCluster: true
+  inClusterContextName: "kind-k8s-local"
+  # Automatic authentication for local development using the cluster-admin ServiceAccount
+  unsafeUseServiceAccountToken: true
+
+serviceAccount:
+  create: true
+  name: "headlamp-admin"
+
+clusterRoleBinding:
+  create: true
+  clusterRoleName: cluster-admin
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi

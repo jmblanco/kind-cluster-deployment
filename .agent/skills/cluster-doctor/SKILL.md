@@ -15,9 +15,9 @@ triggers:
 Herramienta de diagnóstico proactivo y resolución de incidencias para entornos locales basados en Kind (`kind-k8s-local`), Docker y Kubernetes.
 
 ## Cuándo Usar Esta Skill
-- Fallos al arrancar `./init.sh` o `.\init.ps1` (conflicto de puertos 80, 443, 5000, 37017).
-- Pods en estado `CrashLoopBackOff`, `OOMKilled`, `Pending` o `ImagePullBackOff` (especialmente en namespaces `kafka`, `argocd`, `ingress-nginx`).
-- Servicios web locales no accesibles (`http://kafka-ui.local`, `https://argocd.local`).
+- Fallos al arrancar con `npm start` o `make up` (conflicto de puertos 80, 443, 5000, 37017).
+- Pods en estado `CrashLoopBackOff`, `OOMKilled`, `Pending` o `ImagePullBackOff` (especialmente en namespaces `kafka`, `argocd`, `traefik`).
+- Servicios web locales no accesibles (`http://kafka-ui.local`, `https://argocd.local`, `http://dashboard.local`).
 - Sospecha de agotamiento de memoria/recursos en Docker Desktop / WSL2.
 
 ---

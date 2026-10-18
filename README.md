@@ -23,11 +23,12 @@
 - [About](#about)
 - [Prerequisites](#prerequisites)
 - [Architecture & Stack](#architecture--stack)
+  - [Component Architecture & Role Guide](docs/ARCHITECTURE.md)
+  - [DNS Assistant & Resolution Guide](docs/DNS-GUIDE.md)
 - [Folder Structure](#folder-structure)
 - [Quick Start](#quick-start)
-  - [Interactive Mode](#interactive-mode)
-  - [CLI Mode / Non-Interactive](#cli-mode--non-interactive)
-  - [Using Make](#using-make)
+  - [1. DNS Assistant (Automatic & Manual)](#1-dns-resolution-hosts-file)
+  - [2. Deploy the Stack](#2-deploy-the-stack)
 - [Local Endpoints & Access](#local-endpoints--access)
 - [AI Agent Integration](#ai-agent-integration)
 - [Contributing](#contributing)
@@ -58,7 +59,7 @@ Ensure the following tools are installed and present in your system's `PATH`:
 
 > 💡 **Tip:** Verify that all required dependencies are ready by running:
 > ```bash
-> ./init.sh check
+> npm start check
 > # OR
 > make check
 > ```
@@ -80,20 +81,20 @@ The repository configures an ingress-ready Kind cluster interconnected with a lo
 │        Kind Cluster (kind-k8s-local)     │   │ Standalone Containers     │
 │                                          │   │                           │
 │  ┌────────────────────────────────────┐  │   │  ┌──────────────────────┐ │
-│  │     NGINX Ingress Controller       │  │   │  │ kind-registry (:5000)│ │
-│  └──────┬──────────────────────┬──────┘  │   │  └──────────────────────┘ │
-│         │                      │         │   │                           │
-│         ▼                      ▼         │   │  ┌──────────────────────┐ │
-│  ┌──────────────┐       ┌─────────────┐  │   │  │ kind-mongodb (:37017)│ │
-│  │ Kafka UI     │       │ ArgoCD      │  │   │  └──────────────────────┘ │
-│  │ (:80)        │       │ Server(:443)│  │   └─────────────┬─────────────┘
-│  └──────┬───────┘       └─────────────┘  │                 │
+│  │     Traefik Ingress Controller     │  │   │  │ kind-registry (:5000)│ │
+│  └──────┬──────────────┬──────────────┘  │   │  └──────────────────────┘ │
+│         │              │                 │   │                           │
+│         ▼              ▼                 │   │  ┌──────────────────────┐ │
+│  ┌──────────────┐┌─────────────┐         │   │  │ kind-mongodb (:37017)│ │
+│  │ Kafka UI     ││ ArgoCD      │         │   │  └──────────────────────┘ │
+│  │ (:80)        ││ Server(:443)│         │   └─────────────┬─────────────┘
+│  └──────┬───────┘└─────────────┘         │                 │
 │         │                                │                 │
 │         ▼                                │                 │
-│  ┌──────────────┐                        │   Docker Network│ (kind)
-│  │ Strimzi Kafka│                        │◄────────────────┘
-│  │ (KRaft Mode) │                        │
-│  └──────────────┘                        │
+│  ┌──────────────┐  ┌──────────────────┐  │   Docker Network│ (kind)
+│  │ Strimzi Kafka│  │ Apache APISIX    │  │◄────────────────┘
+│  │ (KRaft Mode) │  │ (API Gateway)    │  │
+│  └──────────────┘  └──────────────────┘  │
 └──────────────────────────────────────────┘
 ```
 
@@ -116,76 +117,93 @@ The repository configures an ingress-ready Kind cluster interconnected with a lo
 ├── AGENTS.md               # Architecture and guidelines for AI agents
 ├── CONTRIBUTING.md          # Community contribution guidelines
 ├── GEMINI.md               # Agent bootstrap instructions
+├── cli/                    # Modern interactive Node.js TUI orchestrator
+│   ├── bin/kind-manager.js # CLI entrypoint
+│   ├── src/                # Modular lifecycle controllers & TUI
+│   └── tests/              # Unit & regression test suite
 ├── Makefile                # Developer build and run shortcuts
-├── README.md               # Project documentation
-└── init.sh                 # Unified deployment script (CLI + Interactive)
+├── package.json            # Root scripts (npm start, npm test)
+└── README.md               # Project documentation
 ```
 
 ---
 
 ## 🚀 Quick Start
 
-### 1. DNS Resolution (Hosts File)
-Add the following line to your `/etc/hosts` (macOS/Linux) or `C:\Windows\System32\drivers\etc\hosts` (Windows):
+### 1. DNS Resolution & Assistant (Hosts File)
+
+The stack exposes services via clean local domains (`*.local`). You can verify and synchronize your system `hosts` file automatically using the built-in DNS Assistant:
+
+```bash
+npm start dns
+# OR run the full diagnostic:
+npm start doctor
+```
+
+> 📖 **Full Guide:** For detailed cross-platform instructions and troubleshooting, see [docs/DNS-GUIDE.md](docs/DNS-GUIDE.md).
+
+Alternatively, you can manually add the following line to your `/etc/hosts` (macOS/Linux) or `C:\Windows\System32\drivers\etc\hosts` (Windows):
 
 ```text
-127.0.0.1 argocd.local kafka-ui.local
+127.0.0.1 dashboard.local headlamp.local registry.local argocd.local kafka-ui.local apisix.local
 ```
 
 ### 2. Deploy the Stack
 
-#### Interactive Mode (Default)
-Run the interactive menu and select `7) Install all`:
+#### Modern Interactive TUI (Recommended)
+Run the visual interactive CLI in Node.js (with ASCII banner, checkboxes, presets, and live spinners):
 ```bash
-./init.sh
+npm start
+# OR using make
+make cli
+# OR directly from cli/
+cd cli && npm start
 ```
 
-#### CLI Mode (Automation & CI/CD)
-Deploy or manage specific components non-interactively:
+#### Non-Interactive CLI / CI/CD Automation
+Deploy, verify, or manage specific components non-interactively via npm or Make:
 
-**Linux / macOS / Git Bash:**
 ```bash
-# Provision everything in one command
-./init.sh all
+# Verify prerequisites:
+npm start check
+# OR: make check
 
-# Or deploy step-by-step:
-./init.sh cluster     # Spin up Kind cluster
-./init.sh registry    # Start local image registry
-./init.sh mongodb     # Start MongoDB container
-./init.sh ingress     # Deploy NGINX Ingress controller
-./init.sh kafka       # Deploy Strimzi Kafka & Kafka UI
-./init.sh argocd      # Deploy ArgoCD
-```
+# Provision the complete stack in order of dependencies:
+npm start all
+# OR: make up
 
-**Windows (PowerShell Nativo):**
-```powershell
-# Interactive menu:
-.\init.ps1
+# Provision modular components:
+npm start cluster       # Spin up Kind cluster only
+npm start registry      # Start local Zot OCI image registry
+npm start mongodb       # Start MongoDB container
+npm start ingress       # Deploy Traefik Ingress controller
+npm start apisix        # Deploy Apache APISIX Gateway
+npm start kafka         # Deploy Strimzi Kafka (KRaft) & Kafka UI
+npm start argocd        # Deploy ArgoCD & Ingress
+npm start headlamp      # Deploy Headlamp Explorer & Metrics-Server
+npm start dashboard     # Deploy Kind Control Panel Dashboard
 
-# Non-interactive CLI:
-.\init.ps1 all         # Provision complete stack
-.\init.ps1 cluster     # Kind cluster only
-.\init.ps1 check       # Verify prerequisites
-.\init.ps1 down        # Cleanup & teardown
-```
-
-#### Using Make
-```bash
-make check   # Verify dependencies
-make up      # Deploy everything
-make down    # Destroy cluster and containers
+# Cleanup & Teardown:
+npm start down
+# OR: make down
 ```
 
 ---
 
 ## 🌐 Local Endpoints & Access
 
-| Service | Access URL | Default Credentials / Info |
-| :--- | :--- | :--- |
-| **ArgoCD** | [https://argocd.local](https://argocd.local) | **User:** `admin`<br>**Password:** printed during installation or retrieved via:<br>`kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" \| base64 -d` |
-| **Kafka UI** | [http://kafka-ui.local](http://kafka-ui.local) | No authentication required (Local development) |
-| **Container Registry**| `localhost:5000` | Push: `docker tag <img-name> localhost:5000/<img-name>`<br>`docker push localhost:5000/<img-name>` |
-| **MongoDB** | `localhost:37017` | Standard connection string:<br>`mongodb://localhost:37017` |
+> 📖 **Architecture & Roles:** For a deep dive into what each piece does, how they interact, and internal ports, see the [Architecture & Component Role Guide](docs/ARCHITECTURE.md).
+
+| Service | Access URL | Default Credentials / Info | Role in the Stack |
+| :--- | :--- | :--- | :--- |
+| **Cluster Dashboard Hub** | [http://dashboard.local](http://dashboard.local) | No auth required | Landing page & service status catalog |
+| **Headlamp Explorer** | [http://headlamp.local](http://headlamp.local) | Token generation button on screen | Visual K8s console, logs & pod shell |
+| **ArgoCD Server** | [https://argocd.local](https://argocd.local) | **User:** `admin`<br>**Password:** printed during installation or retrieved via:<br>`kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" \| base64 -d` | GitOps continuous delivery & sync |
+| **Kafka UI** | [http://kafka-ui.local](http://kafka-ui.local) | No auth required | Management UI for Strimzi Kafka topics & consumers |
+| **Apache APISIX Gateway** | [http://apisix.local](http://apisix.local) | API Gateway endpoint | L7 routing, plugins & microservices gateway |
+| **Zot OCI Registry (UI)** | [http://registry.local](http://registry.local) / `localhost:5000` | No auth required | Local Docker registry with Trivy security scans |
+| **MongoDB** | `localhost:37017` | `mongodb://localhost:37017` | Standalone NoSQL database for testing/mocks |
+| **Kafka Broker (KRaft)** | Internal: `kafka-cluster-kafka-bootstrap.kafka.svc:9092` | KRaft mode (ephemeral/lightweight) | Event-driven pub/sub messaging backbone |
 
 ---
 

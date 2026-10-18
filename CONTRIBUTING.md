@@ -28,15 +28,19 @@ Please be respectful, constructive, and collaborative in all issues, pull reques
 3. **Verify Locally:**
    - Run prerequisite checks:
      ```bash
-     ./init.sh check
+     npm start check
      ```
    - Test your deployment end-to-end:
      ```bash
-     ./init.sh up
+     npm start all
      ```
    - Test teardown:
      ```bash
-     ./init.sh down
+     npm start down
+     ```
+   - Run unit tests:
+     ```bash
+     npm test
      ```
 4. **Commit & Push:**
    - Use conventional commit messages (`feat:`, `fix:`, `docs:`, `refactor:`).
@@ -49,6 +53,6 @@ Please be respectful, constructive, and collaborative in all issues, pull reques
 When contributing a new ecosystem component (e.g. Prometheus, Vault, Cert-Manager):
 1. Place Kubernetes manifests under `templates/<tool-name>.yaml`.
 2. If the tool exposes a Web UI or API, add an Ingress under `ingress/<tool-name>.ingress.yaml`.
-3. Add a dedicated function in `init.sh` and wire it up to both the CLI argument parser and the interactive menu.
+3. Add a dedicated module under `cli/src/modules/<tool-name>.js` and wire it up to the interactive menu in `cli/src/menu.js`.
 4. Add a target to the `Makefile`.
 5. Update `README.md` and `AGENTS.md` with ingress URLs and credentials.
